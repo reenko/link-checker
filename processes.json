@@ -1,0 +1,20 @@
+{
+    "apps": [
+        {
+            "name": "link-checker",
+            "script": "npm",
+            "args":  ["run", "prod"],
+            "env": {
+                "NODE_ENV": "production"
+            },
+            "max_memory_restart": "512M",
+            "ignoreWatch": ["node_modules"],
+            "watch": false,
+            "instances": 1,
+            "exec_mode": "cluster",
+            "out_file": "logs/output.log",
+            "error_file": "logs/error.log",
+            "pid_file": "worker.pid"
+        }
+    ]
+}

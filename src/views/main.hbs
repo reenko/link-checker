@@ -1,0 +1,24 @@
+<div class="container"
+  style="background: #222 url('https://picsum.photos/id/1026/4621/3070') center center no-repeat; background-size: cover;">
+  <div class="row">
+    <div class="col-sm"></div>
+    <!-- Adding some flex properties to center the form and some height to the page, these can be omitted -->
+    <div class="col-sm-12 col-md-8 col-lg-6"
+      style="height: calc(100vh - 10.25rem); display: flex; align-items: center; flex: 0 1 auto;">
+      <form id="form">
+        <fieldset>
+          <legend>Let's check this link</legend>
+          <div class="input-group fluid">
+            <input value="" id="url" placeholder="https://duckduckgo.com" autocomplete="off" tabindex="1"
+              style="min-width: 300px" />
+            <input id="submit" class="secondary" type="submit" value="Check" tabindex="2" />
+          </div>
+
+          {{> messages}}
+        </fieldset>
+      </form>
+    </div>
+    <div class="col-sm"></div>
+  </div>
+</div>
+{{> toast}}
