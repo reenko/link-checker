@@ -1,3 +1,8 @@
+const Type = {
+    FILE: 1,
+    FOLDER: 2,
+}
+
 window.addEventListener('load', (event) => {
     const input = document.getElementById('url');
     input && input.addEventListener('input', handleChange, false);
@@ -54,18 +59,18 @@ async function processValidation() {
 
     const isValidFormat = regexp.test(link);
     const encodedLink = encodeURIComponent(link);
-    const res = isValidFormat ? await callApi('GET', `${API_HOST}/url/headers?link=${encodedLink}`) : null;
 
-    let msg = null;
-    if (!isValidFormat || !res || res.error) {
-        msg = document.getElementById('msg-invalid');
-    } else if (res.headers) {
-        msg = document.getElementById('msg-valid');
+    const result = isValidFormat ? await mockApi(encodedLink) : null;
+
+    if (!isValidFormat || !result || !result.is_exists) {
+        showMessage('msg-invalid')
+    } else if (result.type_id === Type.FILE) {
+        showMessage('msg-file');
+    } else if (result.type_id === Type.FOLDER) {
+        showMessage('msg-folder');
     } else {
-        msg = document.getElementById('msg-not-exists');
+        alert('Oops');
     }
-
-    msg.className = '';
 
     showToast();
 }
@@ -79,29 +84,50 @@ function showToast(time = 3000) {
     }, time);
 }
 
-function hideAllMsgs() {
-    document.getElementById('msg-invalid').className = 'hidden';
-    document.getElementById('msg-valid').className = 'hidden';
-    document.getElementById('msg-not-exists').className = 'hidden';
+function showMessage(id) {
+    const form = document.getElementById('form');
+    if (form && form.firstElementChild) {
+        form.firstElementChild.style.minHeight = '129px';
+    }
+
+    document.getElementById(id).className = '';
 }
 
-async function callApi(method, url = '', data = {}) {
+function hideAllMsgs() {
+    document.getElementById('msg-invalid').className = 'hidden';
+    document.getElementById('msg-file').className = 'hidden';
+    document.getElementById('msg-folder').className = 'hidden';
+}
+
+async function mockApi(url = '') {
     const snooze = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     await snooze(1000); // just for demo
 
-    const response = await fetch(url, {
-        method,
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        redirect: 'follow',
-        referrerPolicy: 'no-referrer',
-    });
+    const hashCode = url.hashCode();
 
-    if (method === 'POST' || method === 'PUT') {
-        response.body = JSON.stringify(data);
+    if (hashCode % 2 === 0) {
+        return {
+            is_exists: true,
+            type_id: Type.FILE,
+        }
     }
 
-    return response.json();
+    if (hashCode % 3 === 0 || hashCode % 5 === 0) {
+        return {
+            is_exists: true,
+            type_id: Type.FOLDER,
+        }
+    }
+
+    return {
+        is_exists: false,
+    }
+}
+
+String.prototype.hashCode = function () {
+    let h;
+    for (let i = 0; i < this.length; i++)
+        h = Math.imul(31, h) + this.charCodeAt(i) | 0;
+
+    return h;
 }
