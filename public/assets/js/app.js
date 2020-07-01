@@ -20,7 +20,7 @@ async function handleSubmit(event) {
     button.value = 'wait...';
     button.className += ' ';
 
-    await processValidation();
+    await processValidation(1000);
 
     button.value = buttonLabel;
     button.removeAttribute('disabled');
@@ -43,7 +43,7 @@ function handleChange(event) {
 }
 
 // TODO: if user updated  link -> cancel active validation process
-async function processValidation() {
+async function processValidation(delay) {
     hideAllMsgs();
 
     const input = document.getElementById('url');
@@ -60,16 +60,18 @@ async function processValidation() {
     const isValidFormat = regexp.test(link);
     const encodedLink = encodeURIComponent(link);
 
-    const result = isValidFormat ? await mockApi(encodedLink) : null;
+    const result = isValidFormat ? await mockApi(encodedLink, delay) : null;
 
-    if (!isValidFormat || !result || !result.is_exists) {
-        showMessage('msg-invalid')
+    if (!isValidFormat) {
+        showMessage('msg-invalid');
+    } else if (!result || !result.is_exists) {
+        showMessage('msg-not-exists');
     } else if (result.type_id === Type.FILE) {
         showMessage('msg-file');
     } else if (result.type_id === Type.FOLDER) {
         showMessage('msg-folder');
     } else {
-        alert('Oops');
+        showMessage('msg-invalid');
     }
 
     showToast();
@@ -90,18 +92,19 @@ function showMessage(id) {
         form.firstElementChild.style.minHeight = '129px';
     }
 
-    document.getElementById(id).className = '';
+    const msg = document.getElementById(id);
+    if (msg) {
+        msg.className = msg.className.replace(' hidden', '');
+    }
 }
 
 function hideAllMsgs() {
-    document.getElementById('msg-invalid').className = 'hidden';
-    document.getElementById('msg-file').className = 'hidden';
-    document.getElementById('msg-folder').className = 'hidden';
+    document.querySelectorAll('.msg').forEach((m) => m.className = "msg hidden");
 }
 
-async function mockApi(url = '') {
+async function mockApi(url = '', delay = 50) {
     const snooze = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    await snooze(1000); // just for demo
+    await snooze(delay); // just for demo
 
     const hashCode = url.hashCode();
 
