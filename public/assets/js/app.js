@@ -31,7 +31,7 @@ let lastChanged;
 function handleChange(event) {
     event.preventDefault();
 
-    const DELAY = 2000;
+    const DELAY = 250;
 
     lastChanged = Date.now();
     setTimeout(() => {
