@@ -3,6 +3,36 @@ const Type = {
     FOLDER: 2,
 }
 
+// State : {
+//     lastChanged : number
+//     message : string
+// }
+
+const state = new Proxy({}, {
+    set: function (obj, prop, value) {
+        switch (prop) {
+            case 'lastChanged':
+                if (!Number.isInteger(value)) {
+                    throw new TypeError('The lastChanged is not an integer');
+                }
+                break;
+            case 'message':
+                if (typeof value !== 'string') {
+                    throw new TypeError('The message is not a string');
+                }
+                // hide old message and show new one
+                obj[prop] && hideMessage(obj[prop]);
+                showMessage(value);
+                break;
+            default:
+                // no validation
+                break;
+        }
+
+        obj[prop] = value;
+    }
+});
+
 window.addEventListener('load', (event) => {
     const input = document.getElementById('url');
     input && input.addEventListener('input', handleChange, false);
@@ -20,30 +50,29 @@ async function handleSubmit(event) {
     button.value = 'wait...';
     button.className += ' ';
 
-    await processValidation(1000);
+    state.lastChanged = Date.now();
+    await processValidation(state.lastChanged, 1000);
 
     button.value = buttonLabel;
     button.removeAttribute('disabled');
 }
-
-let lastChanged;
 
 function handleChange(event) {
     event.preventDefault();
 
     const DELAY = 250;
 
-    lastChanged = Date.now();
+    state.lastChanged = Date.now();
     setTimeout(() => {
         const now = Date.now();
-        if (now - lastChanged > DELAY - 20) {
-            processValidation();
+        if (now - state.lastChanged > DELAY - 20) {
+            processValidation(state.lastChanged, 2000);
         }
     }, DELAY);
 }
 
 // TODO: if user updated  link -> cancel active validation process
-async function processValidation(delay) {
+async function processValidation(callTime, delay = 1000) {
     hideAllMsgs();
 
     const input = document.getElementById('url');
@@ -62,16 +91,21 @@ async function processValidation(delay) {
 
     const result = isValidFormat ? await mockApi(encodedLink, delay) : null;
 
+    if (callTime !== state.lastChanged) {
+        // ignore, it's not the last result
+        return;
+    }
+
     if (!isValidFormat) {
-        showMessage('msg-invalid');
+        state.message = 'msg-invalid';
     } else if (!result || !result.is_exists) {
-        showMessage('msg-not-exists');
+        state.message = 'msg-not-exists';
     } else if (result.type_id === Type.FILE) {
-        showMessage('msg-file');
+        state.message = 'msg-file';
     } else if (result.type_id === Type.FOLDER) {
-        showMessage('msg-folder');
+        state.message = 'msg-folder';
     } else {
-        showMessage('msg-invalid');
+        state.message = 'msg-invalid';
     }
 
     showToast();
@@ -95,6 +129,13 @@ function showMessage(id) {
     const msg = document.getElementById(id);
     if (msg) {
         msg.className = msg.className.replace(' hidden', '');
+    }
+}
+
+function hideMessage(id) {
+    const msg = document.getElementById(id);
+    if (msg) {
+        msg.className = msg.className = 'msg hidden';
     }
 }
 
