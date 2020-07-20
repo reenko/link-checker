@@ -50,11 +50,15 @@ async function handleSubmit(event) {
     button.value = 'wait...';
     button.className += ' ';
 
+    const input = document.getElementById('url');
+    input.setAttribute('disabled', true);
+
     state.lastChanged = Date.now();
     await processValidation(state.lastChanged, 1000);
 
     button.value = buttonLabel;
     button.removeAttribute('disabled');
+    input.removeAttribute('disabled');
 }
 
 function handleChange(event) {
