@@ -16,7 +16,7 @@
     "express": "^4.17.1",
     "express-handlebars": "^4.0.4",
     "http-status-codes": "^1.4.0",
-    "validator": "^13.1.1",
+    "validator": "^13.7.0",
     "typescript": "^3.9.5"
   }
 }
