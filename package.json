@@ -5,7 +5,7 @@
   "scripts": {
     "build": "npx tsc",
     "dev": "TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true npx ts-node ./src/server.ts",
-    "start": "NODE_ENV=production npx ./dist/server.js"
+    "start": "NODE_ENV=production npx ./dist/server.js",
     "prod": "npm run build && npm run start"
   },
   "dependencies": {
